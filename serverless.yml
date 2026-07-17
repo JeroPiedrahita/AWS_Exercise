@@ -1,0 +1,16 @@
+service: practica-aws
+
+provider: ${file(./iac/provider.yml)}
+
+functions:
+  registerPayment: ${file(./iac/functions/register-payment.yml)}
+  getTransaction: ${file(./iac/functions/get-transaction.yml)}
+  generateDailyReport: ${file(./iac/functions/generate-daily-report.yml)}
+
+resources:
+  Resources:
+    TransaccionesTable: ${file(./iac/resources/dynamodb-table.yml)}
+    ReportesBucket: ${file(./iac/resources/report-bucket.yml)}
+
+plugins:
+  - serverless-offline 

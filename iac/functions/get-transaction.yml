@@ -1,0 +1,7 @@
+handler: dist/src/infrastructure/adapters/inputs/get-transaction-handler.handler
+
+events:
+  - http:
+      path: pagos/{id}
+      method: get
+      cors: true

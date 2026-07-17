@@ -1,0 +1,23 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "rootDir": "..",
+        "outDir": "../dist/tests",
+        "types": ["jest", "node"],
+        "baseUrl": "..",
+        "paths": {
+            "@/*": ["./src/*"]
+        },
+        "noEmit": true,
+        "verbatimModuleSyntax": false,
+        "declaration": false,
+        "declarationMap": false,
+        "sourceMap": false
+    },
+    "include": [
+        "./**/*.ts",
+        "../src/**/*.ts"
+    ]
+}

@@ -1,0 +1,6 @@
+handler: dist/src/infrastructure/adapters/inputs/generate-daily-report-handler.handler
+
+events:
+  - schedule:
+      rate: cron(59 23 * * ? *)
+      enabled: true

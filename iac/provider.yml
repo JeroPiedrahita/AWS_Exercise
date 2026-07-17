@@ -1,0 +1,5 @@
+name: aws
+runtime: nodejs20.x
+
+iamRoleStatements:
+  ${file(./iac/resources/iam-role.yml)}

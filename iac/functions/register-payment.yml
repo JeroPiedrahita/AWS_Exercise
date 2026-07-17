@@ -1,0 +1,7 @@
+handler: dist/src/infrastructure/adapters/inputs/lambda-handler.handler
+
+events:
+  - http:
+      path: pagos/registrarDebito
+      method: post
+      cors: true
