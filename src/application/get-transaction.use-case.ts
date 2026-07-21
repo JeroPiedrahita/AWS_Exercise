@@ -1,4 +1,3 @@
-import {Transaction} from "../domain/entities/transaction";
 import { TransactionNotFoundError } from "../domain/exceptions/transaction-not-found.error";
 import { ITransactionRepository} from "../domain/ports/transaction-repository" ;
 
