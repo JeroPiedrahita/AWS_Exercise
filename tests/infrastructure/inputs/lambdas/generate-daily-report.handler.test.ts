@@ -28,13 +28,74 @@ describe('generate-daily-report.handler', () => {
         MockedGenerateDailyReportUseCase.prototype.execute = jest.fn().mockResolvedValue(undefined);
     });
 
-    it('should return 400 when event is null or undefined', async () => {
+    it('should return 400 with validation error format when event is null', async () => {
         const result = await handler(null as unknown as EventBridgeEvent<string, any>);
 
         expect(result.statusCode).toBe(400);
         expect(JSON.parse(result.body)).toEqual({
-            error: 'El evento recibido es inválido.',
+            success: false,
+            data: null,
+            error: 'El evento es requerido.',
         });
+    });
+
+    it('should return 400 with validation error format when event is undefined', async () => {
+        const result = await handler(undefined as unknown as EventBridgeEvent<string, any>);
+
+        expect(result.statusCode).toBe(400);
+        expect(JSON.parse(result.body)).toEqual({
+            success: false,
+            data: null,
+            error: 'El evento es requerido.',
+        });
+    });
+
+    it('should return 400 with validation error format when source is missing', async () => {
+        const invalidEvent = {
+            'detail-type': 'Scheduled Event',
+            detail: {},
+        } as unknown as EventBridgeEvent<string, any>;
+
+        const result = await handler(invalidEvent);
+
+        expect(result.statusCode).toBe(400);
+        const body = JSON.parse(result.body);
+        expect(body.success).toBe(false);
+        expect(body.data).toBeNull();
+        expect(body.error).toBeDefined();
+        expect(body.error).toContain('source');
+    });
+
+    it('should return 400 with validation error format when detail-type is missing', async () => {
+        const invalidEvent = {
+            source: 'aws.events',
+            detail: {},
+        } as unknown as EventBridgeEvent<string, any>;
+
+        const result = await handler(invalidEvent);
+
+        expect(result.statusCode).toBe(400);
+        const body = JSON.parse(result.body);
+        expect(body.success).toBe(false);
+        expect(body.data).toBeNull();
+        expect(body.error).toBeDefined();
+        expect(body.error).toContain('detail-type');
+    });
+
+    it('should return 400 with validation error format when detail is missing', async () => {
+        const invalidEvent = {
+            source: 'aws.events',
+            'detail-type': 'Scheduled Event',
+        } as unknown as EventBridgeEvent<string, any>;
+
+        const result = await handler(invalidEvent);
+
+        expect(result.statusCode).toBe(400);
+        const body = JSON.parse(result.body);
+        expect(body.success).toBe(false);
+        expect(body.data).toBeNull();
+        expect(body.error).toBeDefined();
+        expect(body.error).toContain('detail');
     });
 
     it('should return 200 with success message on successful execution', async () => {
@@ -46,7 +107,7 @@ describe('generate-daily-report.handler', () => {
         });
     });
 
-    it('should return 400 when a BaseError is thrown', async () => {
+    it('should return 400 with domain error format when a BaseError is thrown', async () => {
         class TestBaseError extends BaseError {
             constructor() {
                 super('Internal error message', 'User-facing error message');
@@ -63,7 +124,7 @@ describe('generate-daily-report.handler', () => {
         });
     });
 
-    it('should return 500 when an unhandled error is thrown', async () => {
+    it('should return 500 with domain error format when an unhandled error is thrown', async () => {
         MockedGenerateDailyReportUseCase.prototype.execute = jest.fn().mockRejectedValue(new Error('Unexpected failure'));
 
         const result = await handler(mockEvent);

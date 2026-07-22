@@ -1,5 +1,6 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '@/infrastructure/inputs/lambdas/lambda.handler';
+import { BaseError } from '@/domain/exceptions/base.error';
 
 jest.mock('@/infrastructure/outputs/dynamondb-transaction-adapter', () => ({
     DynamonDBTransactionAdapter: jest.fn().mockImplementation(() => ({
@@ -79,7 +80,7 @@ describe('Payment Lambda Handler', () => {
         expect(responseBody.message).toBe('Transaccion procesada con exito');
     });
 
-    it('should return 400 when event body is null', async () => {
+    it('should return 400 with validation error format when event body is null', async () => {
         const event = createMockApiGatewayEvent({
             body: null,
         });
@@ -88,10 +89,14 @@ describe('Payment Lambda Handler', () => {
 
         expect(result.statusCode).toBe(400);
         const responseBody = JSON.parse(result.body);
-        expect(responseBody.error).toBe('El evento recibido es inválido.');
+        expect(responseBody).toEqual({
+            success: false,
+            data: null,
+            error: 'El cuerpo de la solicitud es requerido.',
+        });
     });
 
-    it('should return 400 when event body is invalid JSON', async () => {
+    it('should return 400 with validation error format when event body is invalid JSON', async () => {
         const event = createMockApiGatewayEvent({
             body: 'not-valid-json{{{',
         });
@@ -100,7 +105,81 @@ describe('Payment Lambda Handler', () => {
 
         expect(result.statusCode).toBe(400);
         const responseBody = JSON.parse(result.body);
-        expect(responseBody.error).toBe('El cuerpo de la solicitud no tiene un formato válido.');
+        expect(responseBody).toEqual({
+            success: false,
+            data: null,
+            error: 'El cuerpo de la solicitud no tiene un formato JSON válido.',
+        });
+    });
+
+    it('should return 400 with validation error format when required fields are missing', async () => {
+        const event = createMockApiGatewayEvent({
+            body: JSON.stringify({ id: 'txn-001' }),
+        });
+
+        const result = await handler(event);
+
+        expect(result.statusCode).toBe(400);
+        const responseBody = JSON.parse(result.body);
+        expect(responseBody.success).toBe(false);
+        expect(responseBody.data).toBeNull();
+        expect(responseBody.error).toBeDefined();
+        expect(responseBody.error).toContain('accountId');
+    });
+
+    it('should return 400 with validation error format when amount is invalid type', async () => {
+        const event = createMockApiGatewayEvent({
+            body: JSON.stringify({ id: 'txn-001', accountId: 'acc-001', amount: 'not-a-number' }),
+        });
+
+        const result = await handler(event);
+
+        expect(result.statusCode).toBe(400);
+        const responseBody = JSON.parse(result.body);
+        expect(responseBody.success).toBe(false);
+        expect(responseBody.data).toBeNull();
+        expect(responseBody.error).toBeDefined();
+        expect(responseBody.error).toContain('amount');
+    });
+
+    it('should return 400 with validation error format when extra fields are present (strict mode)', async () => {
+        const event = createMockApiGatewayEvent({
+            body: JSON.stringify({ id: 'txn-001', accountId: 'acc-001', amount: 100, extraField: 'not-allowed' }),
+        });
+
+        const result = await handler(event);
+
+        expect(result.statusCode).toBe(400);
+        const responseBody = JSON.parse(result.body);
+        expect(responseBody.success).toBe(false);
+        expect(responseBody.data).toBeNull();
+        expect(responseBody.error).toBeDefined();
+    });
+
+    it('should return 400 with domain error format when a BaseError is thrown', async () => {
+        const { ProcessPaymentUseCase } = require('@/application/process-payment.use-cases');
+
+        class TestBaseError extends BaseError {
+            constructor() {
+                super('Internal technical message', 'Error de dominio para el usuario');
+            }
+        }
+
+        ProcessPaymentUseCase.mockImplementation(() => ({
+            execute: jest.fn().mockRejectedValue(new TestBaseError()),
+        }));
+
+        const event = createMockApiGatewayEvent({
+            body: JSON.stringify({ id: 'txn-001', accountId: 'acc-001', amount: 100 }),
+        });
+
+        const result = await handler(event);
+
+        expect(result.statusCode).toBe(400);
+        const responseBody = JSON.parse(result.body);
+        expect(responseBody).toEqual({
+            error: 'Error de dominio para el usuario',
+        });
     });
 
     it('should return 500 when an unhandled error (not BaseError) is thrown', async () => {
@@ -117,6 +196,8 @@ describe('Payment Lambda Handler', () => {
 
         expect(result.statusCode).toBe(500);
         const responseBody = JSON.parse(result.body);
-        expect(responseBody.error).toBe('Error interno del servidor');
+        expect(responseBody).toEqual({
+            error: 'Error interno del servidor',
+        });
     });
 });
