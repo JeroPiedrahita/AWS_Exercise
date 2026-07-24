@@ -11,6 +11,7 @@
             "@/*": ["./src/*"]
         },
         "noEmit": true,
+        "isolatedModules": true,
         "verbatimModuleSyntax": false,
         "declaration": false,
         "declarationMap": false,

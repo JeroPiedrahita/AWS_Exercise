@@ -1,64 +1,59 @@
-import {ProcessPaymentUseCase }from "../../../application/process-payment.use-cases";
-import { DynamonDBTransactionAdapter } from "../../outputs/dynamondb-transaction-adapter";
-import { BaseError } from "../../../domain/exceptions/base.error";
-import { InvalidEventError} from "../../../domain/exceptions/invalid-event.error";
-import {APIGatewayProxyEvent, APIGatewayProxyResult} from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { ProcessPaymentUseCase } from '../../../application/process-payment.use-cases';
+import { DynamonDBTransactionAdapter } from '../../outputs/dynamondb-transaction-adapter';
+import { BaseError } from '../../../domain/exceptions/base.error';
+import { RegisterPaymentRequestSchema } from '../schemas/register-payment.schemas';
+import { validateSchema, buildValidationErrorResponse } from '../schemas/validation.helper';
+
 /**
  * Lambda entry point responsible for processing payment registration requests received
- * through
- * API Gateway.
- * @param event 
- * @returns 
+ * through API Gateway.
+ * @param event - The API Gateway proxy event containing the request
+ * @returns The API Gateway proxy result with appropriate status code and body
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
-        if (!event || !event.body){
-            throw new InvalidEventError(
-                "The API Getway event does not contain a body.",
-                "El evento recibido es inválido."
-            );
+        if (!event || !event.body) {
+            return buildValidationErrorResponse('El cuerpo de la solicitud es requerido.');
         }
-        let body;
 
-        try{
-            body = JSON.parse(event.body);
-        }catch{
-            throw new InvalidEventError(
-                "The request body is not valid JSON.",
-                "El cuerpo de la solicitud no tiene un formato válido."
+        let rawBody: unknown;
+        try {
+            rawBody = JSON.parse(event.body);
+        } catch {
+            return buildValidationErrorResponse(
+                'El cuerpo de la solicitud no tiene un formato JSON válido.'
             );
         }
 
-        //1. Start dependecies
+        const validation = validateSchema(RegisterPaymentRequestSchema, rawBody);
+        if (!validation.success) {
+            return buildValidationErrorResponse(validation.error);
+        }
+
+        const { id, accountId, amount } = validation.data;
+
         const repository = new DynamonDBTransactionAdapter();
         const useCase = new ProcessPaymentUseCase(repository);
+        await useCase.execute(id, accountId, amount);
 
-        await useCase.execute(body.id, body.accountId, body.amount);
-
-        return{
+        return {
             statusCode: 201,
-            body: JSON.stringify(
-                {message:"Transaccion procesada con exito"})
-
-        };    
-    }catch (error: any) {
-
+            body: JSON.stringify({ message: 'Transaccion procesada con exito' }),
+        };
+    } catch (error) {
         if (error instanceof BaseError) {
             console.error(error.internalMessage);
             return {
                 statusCode: 400,
-                body: JSON.stringify({
-                    error: error.userMessage
-                })
+                body: JSON.stringify({ error: error.userMessage }),
             };
         }
-        console.error(error);
 
+        console.error(error);
         return {
             statusCode: 500,
-            body: JSON.stringify({
-                error: "Error interno del servidor"
-            })
+            body: JSON.stringify({ error: 'Error interno del servidor' }),
         };
     }
 };
