@@ -2,6 +2,7 @@ import fc from 'fast-check';
 import { validateAmount } from '@/domain/validators/amount.validator';
 import { ValidationError } from '@/domain/exceptions/validation.error';
 import { ErrorCodes } from '@/domain/constants/error-codes';
+import { AccountRules } from '@/domain/constants/account.constants';
 
 /**
  * Property-based tests for amount validator.
@@ -98,63 +99,66 @@ describe('validateAmount - Property Tests', () => {
  */
 function negativeAmount(): fc.Arbitrary<number> {
     return fc.oneof(
-        fc.double({ min: -999999999.99, max: -0.01, noNaN: true }),
-        fc.integer({ min: -999999999, max: -1 })
+        fc.double({ min: -AccountRules.MAX_INITIAL_AMOUNT, max: -0.01, noNaN: true }),
+        fc.integer({ min: -Math.floor(AccountRules.MAX_INITIAL_AMOUNT), max: -1 })
     );
 }
 
 /**
- * Generates a number strictly greater than 999,999,999.99.
+ * Generates a number strictly greater than MAX_INITIAL_AMOUNT.
  */
 function excessiveAmount(): fc.Arbitrary<number> {
+    const minExcessive = Math.ceil(AccountRules.MAX_INITIAL_AMOUNT) + 1;
     return fc.oneof(
-        fc.double({ min: 1000000000, max: 9999999999, noNaN: true }),
-        fc.integer({ min: 1000000000, max: 9999999999 })
+        fc.double({ min: minExcessive, max: minExcessive * 10, noNaN: true }),
+        fc.integer({ min: minExcessive, max: minExcessive * 10 })
     );
 }
 
 /**
- * Generates a number in [0, 999999999.99] that has more than 2 decimal places.
- * Strategy: generate an integer part and a fractional part with 3+ decimal digits.
+ * Generates a number in [0, MAX_INITIAL_AMOUNT] that has more than MAX_DECIMALS decimal places.
+ * Strategy: generate an integer part and a fractional part with (MAX_DECIMALS + 1)+ decimal digits.
  */
 function tooManyDecimalPlaces(): fc.Arbitrary<number> {
     return fc.record({
-        integerPart: fc.integer({ min: 0, max: 999999999 }),
-        decimalDigits: fc.integer({ min: 3, max: 6 }),
+        integerPart: fc.integer({ min: 0, max: Math.floor(AccountRules.MAX_INITIAL_AMOUNT) }),
+        decimalDigits: fc.integer({ min: AccountRules.MAX_DECIMALS + 1, max: 6 }),
     }).chain(({ integerPart, decimalDigits }) =>
         fc.integer({ min: 1, max: Math.pow(10, decimalDigits) - 1 })
             .map((fractionalInt) => {
                 const fractionalStr = fractionalInt.toString().padStart(decimalDigits, '0');
-                // Ensure the last digit is non-zero so we truly have > 2 decimal places
+                // Ensure the last digit is non-zero so we truly have > MAX_DECIMALS decimal places
                 const lastNonZeroIndex = fractionalStr.length - 1;
                 let adjustedStr = fractionalStr;
                 if (adjustedStr[lastNonZeroIndex] === '0') {
                     adjustedStr = adjustedStr.substring(0, lastNonZeroIndex) + '1';
                 }
-                // Ensure we actually have > 2 meaningful decimal digits
-                // by ensuring a digit beyond position 2 is non-zero
-                if (adjustedStr.length > 2) {
-                    const beyondTwo = adjustedStr.substring(2);
-                    if (beyondTwo.split('').every((c) => c === '0')) {
-                        adjustedStr = adjustedStr.substring(0, 2) + '1' + adjustedStr.substring(3);
+                // Ensure we actually have > MAX_DECIMALS meaningful decimal digits
+                // by ensuring a digit beyond position MAX_DECIMALS is non-zero
+                if (adjustedStr.length > AccountRules.MAX_DECIMALS) {
+                    const beyondMax = adjustedStr.substring(AccountRules.MAX_DECIMALS);
+                    if (beyondMax.split('').every((c) => c === '0')) {
+                        adjustedStr = adjustedStr.substring(0, AccountRules.MAX_DECIMALS) + '1' + adjustedStr.substring(AccountRules.MAX_DECIMALS + 1);
                     }
                 }
                 return parseFloat(`${integerPart}.${adjustedStr}`);
             })
             .filter((amount) => {
-                // Verify the number actually has > 2 decimal places when converted to string
+                // Verify the number actually has > MAX_DECIMALS decimal places when converted to string
                 const decimalPart = amount.toString().split('.')[1];
-                return decimalPart !== undefined && decimalPart.length > 2;
+                return decimalPart !== undefined && decimalPart.length > AccountRules.MAX_DECIMALS;
             })
     );
 }
 
 /**
- * Generates a valid amount: a number in [0, 999999999.99] with at most 2 decimal places.
+ * Generates a valid amount: a number in [0, MAX_INITIAL_AMOUNT] with at most MAX_DECIMALS decimal places.
  * Strategy: generate cents as an integer and convert to a dollar amount.
  */
 function validAmount(): fc.Arbitrary<number> {
-    // Generate amount as integer cents [0, 99999999999] and divide by 100
-    // This guarantees at most 2 decimal places
-    return fc.integer({ min: 0, max: 99999999999 }).map((cents) => cents / 100);
+    // Generate amount as integer cents [0, MAX_INITIAL_AMOUNT * 10^MAX_DECIMALS] and divide by 10^MAX_DECIMALS
+    // This guarantees at most MAX_DECIMALS decimal places
+    const factor = Math.pow(10, AccountRules.MAX_DECIMALS);
+    const maxCents = Math.floor(AccountRules.MAX_INITIAL_AMOUNT * factor);
+    return fc.integer({ min: 0, max: maxCents }).map((cents) => cents / factor);
 }

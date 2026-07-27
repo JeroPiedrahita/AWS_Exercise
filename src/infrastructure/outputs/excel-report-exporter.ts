@@ -1,4 +1,4 @@
-import { ReportExporter } from "../../domain/ports/report-exporter";
+import { ReportExporter } from "../../application/ports/report-exporter";
 import { Workbook } from "exceljs";
 import { Transaction } from "../../domain/entities/transaction";
 /**

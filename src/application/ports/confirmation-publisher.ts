@@ -8,15 +8,10 @@ export interface IConfirmationMessage {
     /** ISO 8601 UTC timestamp */
     readonly createdAt: string;
 }
-
 /**
  * Defines the contract for publishing confirmation messages
- * to an asynchronous message queue.
+ * to an asynchronous message.
  */
-export interface IConfirmationQueue {
-    /**
-     * Publishes a confirmation message to the queue.
-     * @param message The confirmation message to publish.
-     */
+export interface IConfirmationPublisher {
     publish(message: IConfirmationMessage): Promise<void>;
 }

@@ -2,6 +2,7 @@ import fc from 'fast-check';
 import { validateAge } from '@/domain/validators/age.validator';
 import { ValidationError } from '@/domain/exceptions/validation.error';
 import { ErrorCodes } from '@/domain/constants/error-codes';
+import { CustumerAgeRules } from '@/domain/constants/custumers.constants';
 
 /**
  * Property-based tests for age validator.
@@ -245,24 +246,24 @@ function buildScenario(
  */
 function generateUnderageScenario(): fc.Arbitrary<AgeScenario> {
     return fc.oneof(
-        // Case A: birthday reached, complete years = calendarDiff ∈ [0, 17]
+        // Case A: birthday reached, complete years = calendarDiff ∈ [0, MINIMUM_AGE - 1]
         referenceDate()
             .chain(({ year, month, day }) =>
                 fc.tuple(
-                    fc.integer({ min: 0, max: 17 }),
+                    fc.integer({ min: 0, max: CustumerAgeRules.MINIMUM_AGE - 1 }),
                     birthDayOnOrBefore(month, day)
                 ).map(([age, { birthMonth, birthDay }]) =>
                     buildScenario(year, month, day, year - age, birthMonth, birthDay)
                 )
             ),
-        // Case B: birthday not reached, complete years = calendarDiff - 1 ∈ [0, 17]
-        // So calendarDiff ∈ [1, 18]. We constrain currentMonth <= 10 to guarantee
+        // Case B: birthday not reached, complete years = calendarDiff - 1 ∈ [0, MINIMUM_AGE - 1]
+        // So calendarDiff ∈ [1, MINIMUM_AGE]. We constrain currentMonth <= 10 to guarantee
         // there's always a valid later month for birthDayStrictlyAfter.
         fc.record({
             year: fc.integer({ min: 2000, max: 2050 }),
             month: fc.integer({ min: 0, max: 10 }),
             day: fc.integer({ min: 1, max: 28 }),
-            calendarDiff: fc.integer({ min: 1, max: 18 }),
+            calendarDiff: fc.integer({ min: 1, max: CustumerAgeRules.MINIMUM_AGE }),
         }).chain(({ year, month, day, calendarDiff }) =>
             birthDayStrictlyAfter(month, day)
                 .map(({ birthMonth, birthDay }) =>
@@ -278,8 +279,8 @@ function generateUnderageScenario(): fc.Arbitrary<AgeScenario> {
  */
 function generateValidAgeScenario(): fc.Arbitrary<AgeScenario> {
     return fc.oneof(
-        generateWithBirthdayReached({ min: 18, max: 150 }),
-        generateWithBirthdayNotReached({ min: 18, max: 149 })
+        generateWithBirthdayReached({ min: CustumerAgeRules.MINIMUM_AGE, max: CustumerAgeRules.MAXIMUM_AGE }),
+        generateWithBirthdayNotReached({ min: CustumerAgeRules.MINIMUM_AGE, max: CustumerAgeRules.MAXIMUM_AGE - 1 })
     );
 }
 
@@ -329,7 +330,7 @@ function generateBirthdayNotReachedUnderage(): fc.Arbitrary<AgeScenario> {
     }).chain(({ year, month, day }) =>
         birthDayStrictlyAfter(month, day)
             .map(({ birthMonth, birthDay }) =>
-                buildScenario(year, month, day, year - 18, birthMonth, birthDay)
+                buildScenario(year, month, day, year - CustumerAgeRules.MINIMUM_AGE, birthMonth, birthDay)
             )
     );
 }
@@ -356,5 +357,5 @@ function generateFutureDateScenario(): fc.Arbitrary<AgeScenario> {
  * Uses birthday-reached strategy with ageRange [151, 300] — always valid, no filter needed.
  */
 function generateOver150Scenario(): fc.Arbitrary<AgeScenario> {
-    return generateWithBirthdayReached({ min: 151, max: 300 });
+    return generateWithBirthdayReached({ min: CustumerAgeRules.MAXIMUM_AGE + 1, max: CustumerAgeRules.MAXIMUM_AGE * 2 });
 }

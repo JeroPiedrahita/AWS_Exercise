@@ -1,6 +1,6 @@
 import {ITransactionRepository} from "../domain/ports/transaction-repository";
-import { ReportExporter } from "../domain/ports/report-exporter";
-import { FileStorage } from "../domain/ports/file-storage";
+import { ReportExporter } from "./ports/report-exporter";
+import { FileStorage } from "./ports/file-storage";
 
 /**
  * Use case responsible for generating

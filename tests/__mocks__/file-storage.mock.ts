@@ -1,4 +1,4 @@
-import { FileStorage } from '@/domain/ports/file-storage';
+import { FileStorage } from '@/application/ports/file-storage';
 
 export function createMockFileStorage(): jest.Mocked<FileStorage> {
     return {
