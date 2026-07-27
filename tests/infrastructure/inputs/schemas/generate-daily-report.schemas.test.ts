@@ -1,4 +1,5 @@
 import { GenerateDailyReportEventSchema } from '@/infrastructure/inputs/schemas/generate-daily-report.schemas';
+import { SchemaLimits } from '@/infrastructure/constants/schema.constants';
 
 describe('GenerateDailyReportEventSchema', () => {
     const validEvent = {
@@ -18,7 +19,7 @@ describe('GenerateDailyReportEventSchema', () => {
         });
 
         it('should accept source at max length of 256 characters', () => {
-            const input = { ...validEvent, source: 'a'.repeat(256) };
+            const input = { ...validEvent, source: 'a'.repeat(SchemaLimits.MAX_EVENT_FIELD_LENGTH) };
 
             const result = GenerateDailyReportEventSchema.safeParse(input);
 
@@ -26,7 +27,7 @@ describe('GenerateDailyReportEventSchema', () => {
         });
 
         it('should accept detail-type at max length of 256 characters', () => {
-            const input = { ...validEvent, 'detail-type': 'b'.repeat(256) };
+            const input = { ...validEvent, 'detail-type': 'b'.repeat(SchemaLimits.MAX_EVENT_FIELD_LENGTH) };
 
             const result = GenerateDailyReportEventSchema.safeParse(input);
 
@@ -66,7 +67,7 @@ describe('GenerateDailyReportEventSchema', () => {
         });
 
         it('should reject source exceeding 256 characters', () => {
-            const input = { ...validEvent, source: 'a'.repeat(257) };
+            const input = { ...validEvent, source: 'a'.repeat(SchemaLimits.MAX_EVENT_FIELD_LENGTH + 1) };
 
             const result = GenerateDailyReportEventSchema.safeParse(input);
 
@@ -92,7 +93,7 @@ describe('GenerateDailyReportEventSchema', () => {
         });
 
         it('should reject detail-type exceeding 256 characters', () => {
-            const input = { ...validEvent, 'detail-type': 'b'.repeat(257) };
+            const input = { ...validEvent, 'detail-type': 'b'.repeat(SchemaLimits.MAX_EVENT_FIELD_LENGTH + 1) };
 
             const result = GenerateDailyReportEventSchema.safeParse(input);
 

@@ -2,47 +2,49 @@ import { DynamoDBClient, GetItemCommand, PutItemCommand, ScanCommand } from "@aw
 import { Transaction } from "../../domain/entities/transaction";
 import { ITransactionRepository } from "../../domain/ports/transaction-repository";
 import { TransactionStatusType } from "../../domain/constants/transaction-status";
+
 /**
  * DynamoDB implementation of the transaction repository.
- * 
+ *
  * Responsible for persisting and retrieving
  * transaction information from Amazon DynamoDB.
  */
 export class DynamonDBTransactionAdapter implements ITransactionRepository {
 
     private readonly client = new DynamoDBClient({
-        region: "us-east-1"
+        region: process.env.AWS_REGION || 'us-east-1',
     });
+
+    private readonly tableName = process.env.DYNAMODB_TABLE_NAME || 'TransaccionesBancariasDev';
+
     /**
      * Persists a transaction in DynamoDB
      * @param transaction Transaction to be stored.
-     * 
+     *
      * @returns A promise that resolves when the transaction has been
      * successfully saved.
      */
-
     async save(transaction: Transaction): Promise<void> {
-
         await this.client.send(
             new PutItemCommand({
-                TableName: "TransaccionesBancariasDev",
+                TableName: this.tableName,
                 Item: {
                     id: {
-                        S: transaction.id
+                        S: transaction.id,
                     },
                     accountId: {
-                        S: transaction.accountId
+                        S: transaction.accountId,
                     },
                     amount: {
-                        N: transaction.amount.toString()
+                        N: transaction.amount.toString(),
                     },
                     status: {
-                        S: transaction.status
+                        S: transaction.status,
                     },
                     createdAt: {
-                        S: transaction.createdAt.toISOString()
-                    }
-                }
+                        S: transaction.createdAt.toISOString(),
+                    },
+                },
             })
         );
 
@@ -51,14 +53,13 @@ export class DynamonDBTransactionAdapter implements ITransactionRepository {
             transaction.id
         );
     }
+
     /**
      * Converts a DynamoDB item into a Transaction entity
      * @param item DynamoDB item representation.
      * @returns A transaction domain entity
      */
-
-    private mapToTransaction(item: any): Transaction{
-
+    private mapToTransaction(item: any): Transaction {
         return new Transaction(
             item.id.S!,
             item.accountId.S!,
@@ -66,25 +67,24 @@ export class DynamonDBTransactionAdapter implements ITransactionRepository {
             item.status.S! as TransactionStatusType,
             new Date(item.createdAt.S!),
         );
-        
     }
+
     /**
      * Retrieves a transaction by its identifier.
      * @param id Unique transaction identifier.
-     * 
-     * @returns The matching transaction or null if 
-     * no transaction exists 
+     *
+     * @returns The matching transaction or null if
+     * no transaction exists
      */
-
     async getById(id: string): Promise<Transaction | null> {
         const response = await this.client.send(
             new GetItemCommand({
-                TableName: "TransaccionesBancariasDev",
+                TableName: this.tableName,
                 Key: {
-                    id:{
-                        S: id
+                    id: {
+                        S: id,
                     },
-                }
+                },
             })
         );
 
@@ -111,32 +111,28 @@ export class DynamonDBTransactionAdapter implements ITransactionRepository {
      * @param endDate End date of the search range.
      * @returns A list of matching transactions.
      */
-    async getTransactionsBetweenDates(startDate: Date, endDate: Date
-    ): Promise<Transaction[]> {
+    async getTransactionsBetweenDates(startDate: Date, endDate: Date): Promise<Transaction[]> {
         const response = await this.client.send(
             new ScanCommand({
-                TableName: "TransaccionesBancariasDev",
+                TableName: this.tableName,
                 FilterExpression:
                     "createdAt >= :startDate AND createdAt <= :endDate",
                 ExpressionAttributeValues: {
                     ":startDate": {
-                        S: startDate.toISOString()
+                        S: startDate.toISOString(),
                     },
-
-                    ":endDate":{
-                        S: endDate.toISOString()
-                    }
-                }
-
+                    ":endDate": {
+                        S: endDate.toISOString(),
+                    },
+                },
             })
         );
 
-        if (!response.Items){
-            return[];
+        if (!response.Items) {
+            return [];
         }
         return response.Items.map(
-            item => this.mapToTransaction(item)
+            (item) => this.mapToTransaction(item)
         );
     }
-
 }
