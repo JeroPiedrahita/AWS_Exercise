@@ -1,5 +1,6 @@
 import { ValidationError } from '../exceptions/validation.error';
 import { ErrorCodes } from '../constants/error-codes';
+import { AccountRules } from '../constants/account.constants';
 
 /**
  * Validates that the initial amount meets business rules for account creation.
@@ -9,7 +10,7 @@ import { ErrorCodes } from '../constants/error-codes';
  *   exceeds 999,999,999.99, or has more than 2 decimal places
  */
 export function validateAmount(amount: number): void {
-    if (amount < 0) {
+    if (amount < AccountRules.MIN_INITIAL_AMOUNT) {
         throw new ValidationError(
             ErrorCodes.INVALID_INITIAL_AMOUNT,
             ['initialAmount'],
@@ -18,7 +19,7 @@ export function validateAmount(amount: number): void {
         );
     }
 
-    if (amount > 999999999.99) {
+    if (amount > AccountRules.MAX_INITIAL_AMOUNT) {
         throw new ValidationError(
             ErrorCodes.INVALID_INITIAL_AMOUNT,
             ['initialAmount'],
@@ -28,7 +29,7 @@ export function validateAmount(amount: number): void {
     }
 
     const decimalPart = amount.toString().split('.')[1];
-    if (decimalPart && decimalPart.length > 2) {
+    if (decimalPart && decimalPart.length > AccountRules.MAX_DECIMALS) {
         throw new ValidationError(
             ErrorCodes.INVALID_INITIAL_AMOUNT,
             ['initialAmount'],

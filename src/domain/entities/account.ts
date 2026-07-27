@@ -1,4 +1,4 @@
-import { AccountStatusType } from '../constants/account-status';
+import { AccountStatusType } from '../constants/account.constants';
 
 /**
  * Represents a bank account linked to a customer.

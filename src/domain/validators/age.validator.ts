@@ -1,5 +1,6 @@
 import { ValidationError } from '../exceptions/validation.error';
 import { ErrorCodes } from '../constants/error-codes';
+import { CustumerAgeRules } from '../constants/custumers.constants';
 
 /**
  * Validates that a customer's date of birth meets age eligibility requirements.
@@ -42,7 +43,7 @@ export function validateAge(dateOfBirth: string, currentDate: Date): void {
     }
 
     // Check if age exceeds 150
-    if (age > 150) {
+    if (age > CustumerAgeRules.MAXIMUM_AGE) {
         throw new ValidationError(
             ErrorCodes.INVALID_DATE_OF_BIRTH,
             ['dateOfBirth'],
@@ -52,7 +53,7 @@ export function validateAge(dateOfBirth: string, currentDate: Date): void {
     }
 
     // Check if age is less than 18
-    if (age < 18) {
+    if (age < CustumerAgeRules.MINIMUM_AGE) {
         throw new ValidationError(
             ErrorCodes.INVALID_AGE,
             ['dateOfBirth'],
