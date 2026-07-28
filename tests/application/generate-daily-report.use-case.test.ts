@@ -1,7 +1,7 @@
 import { GenerateDailyReportUseCase } from '@/application/generate-daily-report.use-case';
 import { ITransactionRepository } from '@/domain/ports/transaction-repository';
 import { ReportExporter } from '@/application/ports/report-exporter';
-import { FileStorage } from '@/application/ports/file-storage';
+import { FileStorage } from '@/domain/ports/file-storage';
 import { createMockTransactionRepository } from '../__mocks__/transaction-repository.mock';
 import { createMockReportExporter } from '../__mocks__/report-exporter.mock';
 import { createMockFileStorage } from '../__mocks__/file-storage.mock';

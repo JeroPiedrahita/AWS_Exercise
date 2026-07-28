@@ -1,4 +1,4 @@
-import { FileStorage } from "../../application/ports/file-storage";
+import { FileStorage } from "../../domain/ports/file-storage";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 /**
