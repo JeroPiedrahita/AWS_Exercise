@@ -1,10 +1,9 @@
 name: func-${self:service}-${sls:stage}-registerPayment
 description: Processes API Gateway POST events to register debit payment transactions in DynamoDB.
-handler: dist/src/infrastructure/inputs/lambdas/lambda.handler.handler
+handler: dist/src/infrastructure/inputs/lambdas/lambda-handler.handler
 timeout: 30
 memorySize: 256
 environment:
-  AWS_REGION: ${self:custom.awsRegion}
   DYNAMODB_TABLE_NAME: ${self:custom.dynamodbTableName}
   LOG_LEVEL: ${self:custom.logLevel}
 events:

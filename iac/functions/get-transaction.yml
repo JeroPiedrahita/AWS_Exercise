@@ -1,10 +1,9 @@
 name: func-${self:service}-${sls:stage}-getTransaction
 description: Processes API Gateway GET events to retrieve a single transaction by ID from DynamoDB.
-handler: dist/src/infrastructure/inputs/lambdas/get-transaction.handler.handler
+handler: dist/src/infrastructure/inputs/lambdas/get-transaction-handler.handler
 timeout: 30
 memorySize: 256
 environment:
-  AWS_REGION: ${self:custom.awsRegion}
   DYNAMODB_TABLE_NAME: ${self:custom.dynamodbTableName}
   LOG_LEVEL: ${self:custom.logLevel}
 events:
