@@ -1,4 +1,4 @@
-import { handler } from '@/infrastructure/inputs/lambdas/generate-daily-report.handler';
+import { handler } from '@/infrastructure/inputs/lambdas/generate-daily-report-handler';
 import { GenerateDailyReportUseCase } from '@/application/generate-daily-report.use-case';
 import { BaseError } from '@/domain/exceptions/base.error';
 import { EventBridgeEvent } from 'aws-lambda';

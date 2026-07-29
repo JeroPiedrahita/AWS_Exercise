@@ -2,6 +2,13 @@ service: practica-aws
 
 provider: ${file(./iac/provider.yml)}
 
+custom:
+  stage: ${sls:stage}
+  awsRegion: ${env:AWS_REGION, 'us-east-1'}
+  dynamodbTableName: ${env:DYNAMODB_TABLE_NAME, 'TransaccionesBancariasDev'}
+  s3BucketName: ${env:S3_BUCKET_NAME, 'transacciones-reportes-303040220363'}
+  logLevel: ${env:LOG_LEVEL, 'info'}
+
 functions:
   registerPayment: ${file(./iac/functions/register-payment.yml)}
   getTransaction: ${file(./iac/functions/get-transaction.yml)}
@@ -13,4 +20,4 @@ resources:
     ReportesBucket: ${file(./iac/resources/report-bucket.yml)}
 
 plugins:
-  - serverless-offline 
+  - serverless-offline
