@@ -35,7 +35,7 @@ describe('DynamonDBTransactionAdapter', () => {
             const command = mockSend.mock.calls[0][0];
             expect(command).toBeInstanceOf(PutItemCommand);
             expect(command.input).toEqual({
-                TableName: 'TransaccionesBancariasDev',
+                TableName: process.env.DYNAMODB_TABLE_NAME,
                 Item: {
                     id: { S: transaction.id },
                     accountId: { S: transaction.accountId },
@@ -73,7 +73,7 @@ describe('DynamonDBTransactionAdapter', () => {
             const command = mockSend.mock.calls[0][0];
             expect(command).toBeInstanceOf(GetItemCommand);
             expect(command.input).toEqual({
-                TableName: 'TransaccionesBancariasDev',
+                TableName: process.env.DYNAMODB_TABLE_NAME,
                 Key: { id: { S: 'txn-001' } },
             });
 
@@ -144,7 +144,7 @@ describe('DynamonDBTransactionAdapter', () => {
             const command = mockSend.mock.calls[0][0];
             expect(command).toBeInstanceOf(ScanCommand);
             expect(command.input).toEqual({
-                TableName: 'TransaccionesBancariasDev',
+                TableName: process.env.DYNAMODB_TABLE_NAME,
                 FilterExpression: 'createdAt >= :startDate AND createdAt <= :endDate',
                 ExpressionAttributeValues: {
                     ':startDate': { S: startDate.toISOString() },

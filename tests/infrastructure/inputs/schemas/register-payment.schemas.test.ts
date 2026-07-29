@@ -1,4 +1,6 @@
 import { RegisterPaymentRequestSchema } from '@/infrastructure/inputs/schemas/register-payment.schemas';
+import { SchemaLimits } from '@/infrastructure/constants/schema.constants';
+import { AccountRules } from '@/domain/constants/account.constants';
 
 describe('RegisterPaymentRequestSchema', () => {
     const validInput = {
@@ -18,7 +20,7 @@ describe('RegisterPaymentRequestSchema', () => {
         });
 
         it('should accept id at max length of 36 characters', () => {
-            const input = { ...validInput, id: 'a'.repeat(36) };
+            const input = { ...validInput, id: 'a'.repeat(SchemaLimits.MAX_UUID_LENGTH) };
 
             const result = RegisterPaymentRequestSchema.safeParse(input);
 
@@ -26,7 +28,7 @@ describe('RegisterPaymentRequestSchema', () => {
         });
 
         it('should accept accountId at max length of 36 characters', () => {
-            const input = { ...validInput, accountId: 'b'.repeat(36) };
+            const input = { ...validInput, accountId: 'b'.repeat(SchemaLimits.MAX_UUID_LENGTH) };
 
             const result = RegisterPaymentRequestSchema.safeParse(input);
 
@@ -42,7 +44,7 @@ describe('RegisterPaymentRequestSchema', () => {
         });
 
         it('should accept amount at max value of 999999999.99', () => {
-            const input = { ...validInput, amount: 999_999_999.99 };
+            const input = { ...validInput, amount: AccountRules.MAX_INITIAL_AMOUNT };
 
             const result = RegisterPaymentRequestSchema.safeParse(input);
 
@@ -60,7 +62,7 @@ describe('RegisterPaymentRequestSchema', () => {
         });
 
         it('should reject id exceeding 36 characters', () => {
-            const input = { ...validInput, id: 'a'.repeat(37) };
+            const input = { ...validInput, id: 'a'.repeat(SchemaLimits.MAX_UUID_LENGTH + 1) };
 
             const result = RegisterPaymentRequestSchema.safeParse(input);
 
@@ -78,7 +80,7 @@ describe('RegisterPaymentRequestSchema', () => {
         });
 
         it('should reject accountId exceeding 36 characters', () => {
-            const input = { ...validInput, accountId: 'b'.repeat(37) };
+            const input = { ...validInput, accountId: 'b'.repeat(SchemaLimits.MAX_UUID_LENGTH + 1) };
 
             const result = RegisterPaymentRequestSchema.safeParse(input);
 
@@ -104,7 +106,7 @@ describe('RegisterPaymentRequestSchema', () => {
         });
 
         it('should reject amount greater than 999999999.99', () => {
-            const input = { ...validInput, amount: 1_000_000_000 };
+            const input = { ...validInput, amount: AccountRules.MAX_INITIAL_AMOUNT + 0.01 };
 
             const result = RegisterPaymentRequestSchema.safeParse(input);
 

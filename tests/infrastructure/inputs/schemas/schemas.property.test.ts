@@ -6,6 +6,8 @@ import {
 } from '@/infrastructure/inputs/schemas/get-transaction.schemas';
 import { GenerateDailyReportEventSchema } from '@/infrastructure/inputs/schemas/generate-daily-report.schemas';
 import { validateSchema, validateResponse } from '@/infrastructure/inputs/schemas/validation.helper';
+import { SchemaLimits } from '@/infrastructure/constants/schema.constants';
+import { AccountRules } from '@/domain/constants/account.constants';
 
 /**
  * Property-based tests for Zod DTO validation correctness properties.
@@ -20,23 +22,23 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
     // **Validates: Requirements 1.1, 2.1, 3.1, 8.1**
     describe('Property 1: Schema acceptance boundary - schema accepts iff all constraints satisfied', () => {
         // --- Generators for RegisterPaymentRequestSchema ---
-        const validId = () => fc.string({ minLength: 1, maxLength: 36 });
+        const validId = () => fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_UUID_LENGTH });
         const invalidId = () => fc.oneof(
             fc.constant(''),
-            fc.string({ minLength: 37, maxLength: 50 })
+            fc.string({ minLength: SchemaLimits.MAX_UUID_LENGTH + 1, maxLength: 50 })
         );
 
-        const validAccountId = () => fc.string({ minLength: 1, maxLength: 36 });
+        const validAccountId = () => fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_UUID_LENGTH });
         const invalidAccountId = () => fc.oneof(
             fc.constant(''),
-            fc.string({ minLength: 37, maxLength: 50 })
+            fc.string({ minLength: SchemaLimits.MAX_UUID_LENGTH + 1, maxLength: 50 })
         );
 
-        const validAmount = () => fc.double({ min: 0.01, max: 999_999_999.99, noNaN: true });
+        const validAmount = () => fc.double({ min: 0.01, max: AccountRules.MAX_INITIAL_AMOUNT, noNaN: true });
         const invalidAmount = () => fc.oneof(
             fc.constant(0),
             fc.constant(-1),
-            fc.double({ min: 999_999_999.991, max: 2_000_000_000, noNaN: true })
+            fc.double({ min: AccountRules.MAX_INITIAL_AMOUNT + 0.001, max: 2_000_000_000, noNaN: true })
         );
 
         const registerPaymentArb = (allValid: boolean) => {
@@ -54,9 +56,9 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
                 amount: fc.boolean().chain((v) => v ? validAmount() : invalidAmount()),
             }).filter((obj) => {
                 // Ensure at least one field is actually invalid
-                const idValid = typeof obj.id === 'string' && obj.id.length >= 1 && obj.id.length <= 36;
-                const accountIdValid = typeof obj.accountId === 'string' && obj.accountId.length >= 1 && obj.accountId.length <= 36;
-                const amountValid = typeof obj.amount === 'number' && obj.amount > 0 && obj.amount <= 999_999_999.99;
+                const idValid = typeof obj.id === 'string' && obj.id.length >= 1 && obj.id.length <= SchemaLimits.MAX_UUID_LENGTH;
+                const accountIdValid = typeof obj.accountId === 'string' && obj.accountId.length >= 1 && obj.accountId.length <= SchemaLimits.MAX_UUID_LENGTH;
+                const amountValid = typeof obj.amount === 'number' && obj.amount > 0 && obj.amount <= AccountRules.MAX_INITIAL_AMOUNT;
                 return !(idValid && accountIdValid && amountValid);
             });
         };
@@ -82,11 +84,11 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
         });
 
         // --- Generators for GetTransactionPathParamsSchema ---
-        const validPathId = () => fc.string({ minLength: 1, maxLength: 128 }).filter((s) => s.trim().length >= 1);
+        const validPathId = () => fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_TRANSACTION_ID_LENGTH }).filter((s) => s.trim().length >= 1);
         const invalidPathId = () => fc.oneof(
             fc.constant(''),
             fc.constant('   '),
-            fc.string({ minLength: 129, maxLength: 200 })
+            fc.string({ minLength: SchemaLimits.MAX_TRANSACTION_ID_LENGTH + 1, maxLength: 200 })
         );
 
         it('GetTransactionPathParamsSchema accepts valid inputs and rejects invalid ones', () => {
@@ -110,16 +112,16 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
         });
 
         // --- Generators for GenerateDailyReportEventSchema ---
-        const validSource = () => fc.string({ minLength: 1, maxLength: 256 });
+        const validSource = () => fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_EVENT_FIELD_LENGTH });
         const invalidSource = () => fc.oneof(
             fc.constant(''),
-            fc.string({ minLength: 257, maxLength: 300 })
+            fc.string({ minLength: SchemaLimits.MAX_EVENT_FIELD_LENGTH + 1, maxLength: 300 })
         );
 
-        const validDetailType = () => fc.string({ minLength: 1, maxLength: 256 });
+        const validDetailType = () => fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_EVENT_FIELD_LENGTH });
         const invalidDetailType = () => fc.oneof(
             fc.constant(''),
-            fc.string({ minLength: 257, maxLength: 300 })
+            fc.string({ minLength: SchemaLimits.MAX_EVENT_FIELD_LENGTH + 1, maxLength: 300 })
         );
 
         const validDetail = () => fc.object();
@@ -137,8 +139,8 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
                 'detail-type': fc.boolean().chain((v) => v ? validDetailType() : invalidDetailType()),
                 detail: validDetail(),
             }).filter((obj) => {
-                const sourceValid = typeof obj.source === 'string' && obj.source.length >= 1 && obj.source.length <= 256;
-                const detailTypeValid = typeof obj['detail-type'] === 'string' && obj['detail-type'].length >= 1 && obj['detail-type'].length <= 256;
+                const sourceValid = typeof obj.source === 'string' && obj.source.length >= 1 && obj.source.length <= SchemaLimits.MAX_EVENT_FIELD_LENGTH;
+                const detailTypeValid = typeof obj['detail-type'] === 'string' && obj['detail-type'].length >= 1 && obj['detail-type'].length <= SchemaLimits.MAX_EVENT_FIELD_LENGTH;
                 return !(sourceValid && detailTypeValid);
             });
         };
@@ -170,7 +172,7 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
         const validTxnAccountId = () => fc.string({ minLength: 1, maxLength: 50 });
         const invalidTxnAccountId = () => fc.constant('');
 
-        const validTxnAmount = () => fc.double({ min: 0.01, max: 999_999_999, noNaN: true });
+        const validTxnAmount = () => fc.double({ min: 0.01, max: AccountRules.MAX_INITIAL_AMOUNT, noNaN: true });
         const invalidTxnAmount = () => fc.oneof(fc.constant(0), fc.constant(-1));
 
         const validStatus = () => fc.constantFrom('PENDING', 'COMPLETED', 'FAILED');
@@ -234,9 +236,9 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
     describe('Property 2: Validation pass-through preserves data - safeParse(valid).data equals input', () => {
         it('RegisterPaymentRequestSchema preserves valid input data', () => {
             const validRegisterPaymentArb = fc.record({
-                id: fc.string({ minLength: 1, maxLength: 36 }),
-                accountId: fc.string({ minLength: 1, maxLength: 36 }),
-                amount: fc.double({ min: 0.01, max: 999_999_999.99, noNaN: true }),
+                id: fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_UUID_LENGTH }),
+                accountId: fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_UUID_LENGTH }),
+                amount: fc.double({ min: 0.01, max: AccountRules.MAX_INITIAL_AMOUNT, noNaN: true }),
             });
 
             fc.assert(
@@ -255,10 +257,10 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
             const validPathParamsArb = fc.record({
                 id: fc.tuple(
                     fc.nat({ max: 5 }).map((n) => ' '.repeat(n)),
-                    fc.string({ minLength: 1, maxLength: 118 }).filter((s) => s.trim().length >= 1),
+                    fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_TRANSACTION_ID_LENGTH - 10 }).filter((s) => s.trim().length >= 1),
                     fc.nat({ max: 5 }).map((n) => ' '.repeat(n))
                 ).map(([leading, core, trailing]) => `${leading}${core}${trailing}`)
-                 .filter((s) => s.length >= 1 && s.length <= 128),
+                 .filter((s) => s.length >= 1 && s.length <= SchemaLimits.MAX_TRANSACTION_ID_LENGTH),
             });
 
             fc.assert(
@@ -275,8 +277,8 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
 
         it('GenerateDailyReportEventSchema preserves valid input data', () => {
             const validDailyReportArb = fc.record({
-                source: fc.string({ minLength: 1, maxLength: 256 }),
-                'detail-type': fc.string({ minLength: 1, maxLength: 256 }),
+                source: fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_EVENT_FIELD_LENGTH }),
+                'detail-type': fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_EVENT_FIELD_LENGTH }),
                 detail: fc.object(),
             });
 
@@ -296,7 +298,7 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
             const validTransactionResponseArb = fc.record({
                 id: fc.string({ minLength: 1, maxLength: 50 }),
                 accountId: fc.string({ minLength: 1, maxLength: 50 }),
-                amount: fc.double({ min: 0.01, max: 999_999_999, noNaN: true }),
+                amount: fc.double({ min: 0.01, max: AccountRules.MAX_INITIAL_AMOUNT, noNaN: true }),
                 status: fc.constantFrom('PENDING', 'COMPLETED', 'FAILED'),
                 createdAt: fc.integer({ min: 946684800000, max: 4102444800000 })
                     .map((ms) => new Date(ms).toISOString()),
@@ -406,9 +408,9 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
     describe('Property 4: Strict mode rejects unknown properties - RegisterPaymentRequest rejects extra keys', () => {
         it('RegisterPaymentRequestSchema rejects valid input with additional unknown properties', () => {
             const validBaseArb = fc.record({
-                id: fc.string({ minLength: 1, maxLength: 36 }),
-                accountId: fc.string({ minLength: 1, maxLength: 36 }),
-                amount: fc.double({ min: 0.01, max: 999_999_999.99, noNaN: true }),
+                id: fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_UUID_LENGTH }),
+                accountId: fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_UUID_LENGTH }),
+                amount: fc.double({ min: 0.01, max: AccountRules.MAX_INITIAL_AMOUNT, noNaN: true }),
             });
 
             const extraKeysArb = fc.array(
@@ -494,7 +496,7 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
         const validTxnAccountId = () => fc.string({ minLength: 1, maxLength: 50 });
         const invalidTxnAccountId = () => fc.constant('');
 
-        const validTxnAmount = () => fc.double({ min: 0.01, max: 999_999_999, noNaN: true });
+        const validTxnAmount = () => fc.double({ min: 0.01, max: AccountRules.MAX_INITIAL_AMOUNT, noNaN: true });
         const invalidTxnAmount = () => fc.oneof(fc.constant(0), fc.constant(-1));
 
         const validStatus = () => fc.constantFrom('PENDING', 'COMPLETED', 'FAILED');

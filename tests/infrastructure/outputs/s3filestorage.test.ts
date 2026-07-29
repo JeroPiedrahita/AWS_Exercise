@@ -32,7 +32,7 @@ describe('S3FileStorage', () => {
         const command = mockSend.mock.calls[0][0];
         expect(command).toBeInstanceOf(PutObjectCommand);
         expect(command.input).toEqual({
-            Bucket: 'transacciones-reportes-303040220363',
+            Bucket: process.env.S3_BUCKET_NAME,
             Key: fileName,
             Body: fileContent,
         });

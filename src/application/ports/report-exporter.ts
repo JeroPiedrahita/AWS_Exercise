@@ -1,4 +1,4 @@
-import {Transaction} from "../entities/transaction";
+import {Transaction} from "../../domain/entities/transaction";
 import { Buffer } from "buffer";
 /**
  * Defines the contract for exporting transaction reports.
