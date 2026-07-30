@@ -1,15 +1,6 @@
 import { ICustomerRepository } from '../domain/ports/customer-repository';
-import { IEmailService } from '../domain/ports/email-service';
-
-/**
- * Request DTO for sending a confirmation email to a customer.
- */
-export interface ISendConfirmationRequest {
-    email: string;
-    accountNumber: string;
-    customerName: string;
-    createdAt: string;
-}
+import { IEmailService } from './ports/email-service';
+import { ISendConfirmationRequest } from './dtos/send-confirmation.dto';
 
 /**
  * Use case that orchestrates sending a confirmation email to a customer

@@ -1,7 +1,7 @@
 import { ICustomerRepository } from '../domain/ports/customer-repository';
 import { ICustomerAccountRepository } from '../domain/ports/customer-account-repository';
 import { IAccountNumberGenerator } from '../domain/ports/account-number-generator';
-import { IConfirmationQueue } from '../domain/ports/confirmation-queue';
+import { IConfirmationPublisher } from '../domain/ports/confirmation-publisher';
 import { Customer } from '../domain/entities/customer';
 import { Account } from '../domain/entities/account';
 import { AccountStatus } from '../domain/constants/account-status';
@@ -11,28 +11,10 @@ import { ConflictError } from '../domain/exceptions/conflict.error';
 import { validateEmail } from '../domain/validators/email.validator';
 import { validateAge } from '../domain/validators/age.validator';
 import { validateAmount } from '../domain/validators/amount.validator';
+import { ICreateCustomerAccountRequest, ICreateCustomerAccountResponse } from './dtos/create-customer-account.dto';
 import crypto from 'crypto';
 
-/**
- * Request DTO for creating a customer account.
- */
-export interface ICreateCustomerAccountRequest {
-    name: string;
-    dateOfBirth: string;
-    identificationNumber: string;
-    email: string;
-    initialAmount: number;
-    requestId: string;
-}
 
-/**
- * Response DTO returned after successful account creation.
- */
-export interface ICreateCustomerAccountResponse {
-    accountNumber: string;
-    status: string;
-    balance: number;
-}
 
 /**
  * Use case that orchestrates the creation of a new customer account.
@@ -44,7 +26,7 @@ export class CreateCustomerAccountUseCase {
         private readonly customerRepository: ICustomerRepository,
         private readonly customerAccountRepository: ICustomerAccountRepository,
         private readonly accountNumberGenerator: IAccountNumberGenerator,
-        private readonly confirmationQueue: IConfirmationQueue
+        private readonly confirmationQueue: IConfirmationPublisher
     ) {}
 
     /**
