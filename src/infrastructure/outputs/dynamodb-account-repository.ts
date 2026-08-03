@@ -5,7 +5,7 @@ import { IAccountRepository } from "../../domain/ports/account-repository";
  * DynamoDB implementation of the account repository port.
  *
  * Responsible for querying account records in DynamoDB.
- * Uses the AccountsTable GSI (AccountNumberIndex) for account number uniqueness checks.
+ * Uses the AccountsTable GSI (AccountNumberIndex-v1) for account number uniqueness checks.
  */
 export class DynamoDBAccountRepository implements IAccountRepository {
 
@@ -16,12 +16,12 @@ export class DynamoDBAccountRepository implements IAccountRepository {
      * @param client The DynamoDB client used for all database operations.
      */
     constructor(private readonly client: DynamoDBClient) {
-        this.tableName = process.env.ACCOUNTS_TABLE || 'AccountsTable';
+        this.tableName = process.env.ACCOUNTS_TABLE_NAME || 'AccountsTable';
     }
 
     /**
      * Checks if an account with the given account number already exists.
-     * Uses the AccountNumberIndex GSI for efficient lookup.
+     * Uses the AccountNumberIndex-v1 GSI for efficient lookup.
      * @param accountNumber The 10-digit account number to check.
      * @returns True if an account with that number exists.
      */
@@ -29,7 +29,7 @@ export class DynamoDBAccountRepository implements IAccountRepository {
         const response = await this.client.send(
             new QueryCommand({
                 TableName: this.tableName,
-                IndexName: 'AccountNumberIndex',
+                IndexName: 'AccountNumberIndex-v1',
                 KeyConditionExpression: 'accountNumber = :accountNumber',
                 ExpressionAttributeValues: {
                     ':accountNumber': { S: accountNumber },

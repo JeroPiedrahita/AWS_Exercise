@@ -6,7 +6,7 @@ import { ICustomerRepository } from "../../domain/ports/customer-repository";
  *
  * Responsible for querying and updating customer records in DynamoDB.
  * Uses the CustomersTable GSI (IdentificationNumberIndex) for duplicate detection,
- * and the AccountsTable GSI (AccountNumberIndex) to resolve accountNumber → customerId
+ * and the AccountsTable GSI (AccountNumberIndex-v1) to resolve accountNumber → customerId
  * for confirmation status operations.
  */
 export class DynamoDBCustomerRepository implements ICustomerRepository {
@@ -19,8 +19,8 @@ export class DynamoDBCustomerRepository implements ICustomerRepository {
      * @param client The DynamoDB client used for all database operations.
      */
     constructor(private readonly client: DynamoDBClient) {
-        this.customersTableName = process.env.CUSTOMERS_TABLE || 'CustomersTable';
-        this.accountsTableName = process.env.ACCOUNTS_TABLE || 'AccountsTable';
+        this.customersTableName = process.env.CUSTOMERS_TABLE_NAME || 'CustomersTable';
+        this.accountsTableName = process.env.ACCOUNTS_TABLE_NAME || 'AccountsTable';
     }
 
     /**
@@ -109,7 +109,7 @@ export class DynamoDBCustomerRepository implements ICustomerRepository {
 
     /**
      * Resolves the customerId for a given accountNumber by querying the
-     * AccountsTable AccountNumberIndex GSI.
+     * AccountsTable AccountNumberIndex-v1 GSI.
      * @param accountNumber The account number to look up.
      * @returns The customerId associated with the account, or null if not found.
      */
@@ -117,7 +117,7 @@ export class DynamoDBCustomerRepository implements ICustomerRepository {
         const response = await this.client.send(
             new QueryCommand({
                 TableName: this.accountsTableName,
-                IndexName: 'AccountNumberIndex',
+                IndexName: 'AccountNumberIndex-v1',
                 KeyConditionExpression: 'accountNumber = :accountNumber',
                 ExpressionAttributeValues: {
                     ':accountNumber': { S: accountNumber },
@@ -125,6 +125,11 @@ export class DynamoDBCustomerRepository implements ICustomerRepository {
                 Limit: 1,
             })
         );
+
+        console.log("===== QUERY ACCOUNTNUMBERINDEX =====");
+        console.log("AccountNumber recibido:", accountNumber);
+        console.log("Respuesta DynamoDB:", JSON.stringify(response, null, 2));
+        console.log("===================================");
 
         if (!response.Items || response.Items.length === 0) {
             return null;

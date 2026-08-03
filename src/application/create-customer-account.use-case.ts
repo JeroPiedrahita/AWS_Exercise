@@ -1,7 +1,7 @@
 import { ICustomerRepository } from '../domain/ports/customer-repository';
 import { ICustomerAccountRepository } from '../domain/ports/customer-account-repository';
 import { IAccountNumberGenerator } from '../domain/ports/account-number-generator';
-import { IConfirmationQueue } from '../domain/ports/confirmation-queue';
+import { IConfirmationPublisher } from '../domain/ports/confirmation-publisher';
 import { Customer } from '../domain/entities/customer';
 import { Account } from '../domain/entities/account';
 import { AccountStatus } from '../domain/constants/account-status';
@@ -44,7 +44,7 @@ export class CreateCustomerAccountUseCase {
         private readonly customerRepository: ICustomerRepository,
         private readonly customerAccountRepository: ICustomerAccountRepository,
         private readonly accountNumberGenerator: IAccountNumberGenerator,
-        private readonly confirmationQueue: IConfirmationQueue
+        private readonly confirmationQueue: IConfirmationPublisher
     ) {}
 
     /**

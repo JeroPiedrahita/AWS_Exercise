@@ -1,5 +1,5 @@
 import { ICustomerRepository } from '../domain/ports/customer-repository';
-import { IEmailService } from '../domain/ports/email-service';
+import { IEmailService } from './ports/email-service';
 
 /**
  * Request DTO for sending a confirmation email to a customer.

@@ -13,7 +13,7 @@ jest.mock('@/infrastructure/outputs/dynamodb-transaction-adapter');
 jest.mock('@/infrastructure/outputs/account-number-generator-adapter');
 jest.mock('@/infrastructure/outputs/sqs-confirmation-queue-adapter');
 
-import { handler } from '@/infrastructure/inputs/lambdas/create-customer.handler';
+import { handler } from '@/infrastructure/inputs/lambdas/create-customer-handler';
 import { CreateCustomerAccountUseCase } from '@/application/create-customer-account.use-case';
 
 const MockCreateCustomerAccountUseCase = CreateCustomerAccountUseCase as jest.MockedClass<typeof CreateCustomerAccountUseCase>;

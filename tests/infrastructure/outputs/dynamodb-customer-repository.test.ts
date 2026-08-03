@@ -102,7 +102,7 @@ describe('DynamoDBCustomerRepository', () => {
             expect(accountQuery).toBeInstanceOf(QueryCommand);
             expect(accountQuery.input).toEqual({
                 TableName: 'TestAccountsTable',
-                IndexName: 'AccountNumberIndex',
+                IndexName: 'AccountNumberIndex-v1',
                 KeyConditionExpression: 'accountNumber = :accountNumber',
                 ExpressionAttributeValues: {
                     ':accountNumber': { S: '1234567890' },
