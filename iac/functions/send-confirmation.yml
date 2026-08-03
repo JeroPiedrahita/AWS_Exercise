@@ -1,0 +1,13 @@
+name: func-${self:service}-${sls:stage}-sendConfirmation
+description: Processes SQS events from the Confirmation Queue to send account creation confirmation emails via SES.
+handler: dist/src/infrastructure/inputs/lambdas/send-confirmation-handler.handler
+timeout: 30
+memorySize: 256
+environment:
+  CUSTOMERS_TABLE_NAME: !Ref CustomersTable
+  SES_SOURCE_EMAIL: ${env:SES_SOURCE_EMAIL, 'noreply@example.com'}
+  LOG_LEVEL: ${self:custom.logLevel}
+events:
+  - sqs:
+      arn: !GetAtt ConfirmationQueue.Arn
+      batchSize: 1

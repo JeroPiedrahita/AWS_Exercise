@@ -1,0 +1,31 @@
+Type: AWS::DynamoDB::Table
+
+Properties:
+  TableName: ${self:service}-accounts-${self:custom.stage}
+  BillingMode: PAY_PER_REQUEST
+
+  AttributeDefinitions:
+    - AttributeName: accountId
+      AttributeType: S
+    - AttributeName: accountNumber
+      AttributeType: S
+    - AttributeName: customerId
+      AttributeType: S
+
+  KeySchema:
+    - AttributeName: accountId
+      KeyType: HASH
+
+  GlobalSecondaryIndexes:
+    - IndexName: AccountNumberIndex
+      KeySchema:
+        - AttributeName: accountNumber
+          KeyType: HASH
+      Projection:
+        ProjectionType: KEYS_ONLY
+    - IndexName: CustomerIdIndex
+      KeySchema:
+        - AttributeName: customerId
+          KeyType: HASH
+      Projection:
+        ProjectionType: ALL
