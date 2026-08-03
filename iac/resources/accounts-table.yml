@@ -17,13 +17,18 @@ Properties:
       KeyType: HASH
 
   GlobalSecondaryIndexes:
-    - IndexName: AccountNumberIndex
+    # Nuevo GSI con proyección correcta
+    - IndexName: AccountNumberIndex-v1
       KeySchema:
         - AttributeName: accountNumber
           KeyType: HASH
       Projection:
-        ProjectionType: KEYS_ONLY
-    - IndexName: CustomerIdIndex
+        ProjectionType: INCLUDE
+        NonKeyAttributes:
+          - customerId
+
+    # GSI para buscar por customerId
+    - IndexName: CustomerIdIndex-v1
       KeySchema:
         - AttributeName: customerId
           KeyType: HASH

@@ -9,7 +9,7 @@ custom:
   s3BucketName: ${env:S3_BUCKET_NAME, 'transacciones-reportes-303040220363'}
   logLevel: ${env:LOG_LEVEL, 'info'}
   customersTableName: ${env:CUSTOMERS_TABLE_NAME, 'CustomersTable'}
-  accountsTableName: ${env:ACCOUNTS_TABLE_NAME, 'AccountsTable'}
+  accountsTableName: ${env:ACCOUNTS_TABLE_NAME, 'practica-aws-accounts-dev'}
   confirmationQueueUrl: !Ref ConfirmationQueue
   sesSourceEmail: ${env:SES_SOURCE_EMAIL, 'noreply@example.com'}
 

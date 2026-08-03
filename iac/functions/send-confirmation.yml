@@ -5,7 +5,8 @@ timeout: 30
 memorySize: 256
 environment:
   CUSTOMERS_TABLE_NAME: !Ref CustomersTable
-  SES_SOURCE_EMAIL: ${env:SES_SOURCE_EMAIL, 'noreply@example.com'}
+  ACCOUNTS_TABLE_NAME: !Ref AccountsTable
+  SES_SOURCE_EMAIL: ${env:SES_SOURCE_EMAIL, 'jeronimopiedrahita17@gmail.com'}
   LOG_LEVEL: ${self:custom.logLevel}
 events:
   - sqs:
