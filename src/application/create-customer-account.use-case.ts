@@ -11,10 +11,28 @@ import { ConflictError } from '../domain/exceptions/conflict.error';
 import { validateEmail } from '../domain/validators/email.validator';
 import { validateAge } from '../domain/validators/age.validator';
 import { validateAmount } from '../domain/validators/amount.validator';
-import { ICreateCustomerAccountRequest, ICreateCustomerAccountResponse } from './dtos/create-customer-account.dto';
 import crypto from 'crypto';
 
+/**
+ * Request DTO for creating a customer account.
+ */
+export interface ICreateCustomerAccountRequest {
+    name: string;
+    dateOfBirth: string;
+    identificationNumber: string;
+    email: string;
+    initialAmount: number;
+    requestId: string;
+}
 
+/**
+ * Response DTO returned after successful account creation.
+ */
+export interface ICreateCustomerAccountResponse {
+    accountNumber: string;
+    status: string;
+    balance: number;
+}
 
 /**
  * Use case that orchestrates the creation of a new customer account.
