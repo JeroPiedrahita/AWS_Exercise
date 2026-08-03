@@ -23,8 +23,8 @@ export class DynamoDBTransactionAdapter implements ICustomerAccountRepository {
      * @param client The DynamoDB client used for all database operations.
      */
     constructor(private readonly client: DynamoDBClient) {
-        this.customersTableName = process.env.CUSTOMERS_TABLE || 'CustomersTable';
-        this.accountsTableName = process.env.ACCOUNTS_TABLE || 'AccountsTable';
+        this.customersTableName = process.env.CUSTOMERS_TABLE_NAME || 'CustomersTable';
+        this.accountsTableName = process.env.ACCOUNTS_TABLE_NAME || 'AccountsTable';
     }
 
     /**
