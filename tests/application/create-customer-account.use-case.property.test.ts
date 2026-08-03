@@ -3,7 +3,7 @@ import { CreateCustomerAccountUseCase, ICreateCustomerAccountRequest } from '@/a
 import { ICustomerRepository } from '@/domain/ports/customer-repository';
 import { ICustomerAccountRepository } from '@/domain/ports/customer-account-repository';
 import { IAccountNumberGenerator } from '@/domain/ports/account-number-generator';
-import { IConfirmationQueue } from '@/domain/ports/confirmation-queue';
+import { IConfirmationPublisher } from '@/domain/ports/confirmation-publisher';
 import { ValidationError } from '@/domain/exceptions/validation.error';
 import { ConflictError } from '@/domain/exceptions/conflict.error';
 import { ErrorCodes } from '@/domain/constants/error-codes';
@@ -17,7 +17,7 @@ describe('CreateCustomerAccountUseCase - Property Tests', () => {
     let mockCustomerRepository: jest.Mocked<ICustomerRepository>;
     let mockCustomerAccountRepository: jest.Mocked<ICustomerAccountRepository>;
     let mockAccountNumberGenerator: jest.Mocked<IAccountNumberGenerator>;
-    let mockConfirmationQueue: jest.Mocked<IConfirmationQueue>;
+    let mockConfirmationQueue: jest.Mocked<IConfirmationPublisher>;
     let useCase: CreateCustomerAccountUseCase;
 
     beforeEach(() => {
@@ -37,7 +37,7 @@ describe('CreateCustomerAccountUseCase - Property Tests', () => {
 
         mockConfirmationQueue = {
             publish: jest.fn(),
-        } as jest.Mocked<IConfirmationQueue>;
+        } as jest.Mocked<IConfirmationPublisher>;
 
         useCase = new CreateCustomerAccountUseCase(
             mockCustomerRepository,

@@ -1,7 +1,7 @@
 import fc from 'fast-check';
 import { SendConfirmationUseCase, ISendConfirmationRequest } from '@/application/send-confirmation.use-case';
 import { ICustomerRepository } from '@/domain/ports/customer-repository';
-import { IEmailService } from '@/domain/ports/email-service';
+import { IEmailService } from '../../src/application/ports/email-service';
 
 /**
  * Property-based tests for SendConfirmationUseCase.
