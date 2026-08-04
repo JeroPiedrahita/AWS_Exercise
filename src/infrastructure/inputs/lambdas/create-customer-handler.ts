@@ -12,7 +12,7 @@ import { validateSchema } from '../schemas/validation.helper';
 import { ValidationError } from '../../../domain/exceptions/validation.error';
 import { ConflictError } from '../../../domain/exceptions/conflict.error';
 import { ErrorCodes } from '../../../domain/constants/error-codes';
-
+import { HTTP_STATUS } from '@/infrastructure/constants/http-response';
 /**
  * Lambda handler for the POST /customers endpoint.
  * Creates a new customer account. Does not require authentication.
@@ -25,19 +25,19 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     try {
         if (!event.body) {
-            return buildErrorResponse(400, ErrorCodes.INVALID_REQUEST_FORMAT, 'The request body is required.');
+            return buildErrorResponse(HTTP_STATUS.BAD_REQUEST, ErrorCodes.INVALID_REQUEST_FORMAT, 'The request body is required.');
         }
 
         let rawBody: unknown;
         try {
             rawBody = JSON.parse(event.body);
         } catch {
-            return buildErrorResponse(400, ErrorCodes.INVALID_REQUEST_FORMAT, 'The request body is not valid JSON.');
+            return buildErrorResponse(HTTP_STATUS.BAD_REQUEST, ErrorCodes.INVALID_REQUEST_FORMAT, 'The request body is not valid JSON.');
         }
 
         const validation = validateSchema(CreateCustomerRequestSchema, rawBody);
         if (!validation.success) {
-            return buildErrorResponse(400, ErrorCodes.INVALID_REQUEST_FORMAT, 'The request body does not match the expected format.', [validation.error]);
+            return buildErrorResponse(HTTP_STATUS.BAD_REQUEST, ErrorCodes.INVALID_REQUEST_FORMAT, 'The request body does not match the expected format.', [validation.error]);
         }
 
         const { name, dateOfBirth, identificationNumber, email, initialAmount } = validation.data;
@@ -69,7 +69,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         });
 
         return {
-            statusCode: 201,
+            statusCode: HTTP_STATUS.CREATED,
             body: JSON.stringify({
                 success: true,
                 data: result,
@@ -90,7 +90,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 elapsedMs,
             }));
 
-            return buildErrorResponse(400, error.code, error.userMessage, error.fields);
+            return buildErrorResponse(HTTP_STATUS.BAD_REQUEST, error.code, error.userMessage, error.fields);
         }
 
         if (error instanceof ConflictError) {
@@ -103,7 +103,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 elapsedMs,
             }));
 
-            return buildErrorResponse(409, error.code, error.userMessage);
+            return buildErrorResponse(HTTP_STATUS.CONFLICT_ERROR, error.code, error.userMessage);
         }
 
         // Unknown error - log full details but never expose internals in response
@@ -118,7 +118,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             elapsedMs,
         }));
 
-        return buildErrorResponse(500, ErrorCodes.INTERNAL_SERVER_ERROR, 'An unexpected error occurred. Please try again later.');
+        return buildErrorResponse(HTTP_STATUS.INTERNAL_ERROR, ErrorCodes.INTERNAL_SERVER_ERROR, 'An unexpected error occurred. Please try again later.');
     }
 };
 
