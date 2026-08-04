@@ -4,7 +4,7 @@ import { DynamonDBTransactionAdapter } from '../../outputs/dynamondb-transaction
 import { BaseError } from '../../../domain/exceptions/base.error';
 import { RegisterPaymentRequestSchema } from '../schemas/register-payment.schemas';
 import { validateSchema, buildValidationErrorResponse } from '../schemas/validation.helper';
-
+import { HTTP_STATUS } from '@/infrastructure/constants/http-response';
 /**
  * Lambda entry point responsible for processing payment registration requests received
  * through API Gateway.
@@ -38,21 +38,21 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         await useCase.execute(id, accountId, amount);
 
         return {
-            statusCode: 201,
+            statusCode: HTTP_STATUS.CREATED,
             body: JSON.stringify({ message: 'Transaccion procesada con exito' }),
         };
     } catch (error) {
         if (error instanceof BaseError) {
             console.error(error.internalMessage);
             return {
-                statusCode: 400,
+                statusCode: HTTP_STATUS.BAD_REQUEST,
                 body: JSON.stringify({ error: error.userMessage }),
             };
         }
 
         console.error(error);
         return {
-            statusCode: 500,
+            statusCode: HTTP_STATUS.INTERNAL_ERROR,
             body: JSON.stringify({ error: 'Error interno del servidor' }),
         };
     }
