@@ -4,7 +4,7 @@ handler: dist/src/infrastructure/inputs/lambdas/get-transaction-handler.handler
 timeout: 30
 memorySize: 256
 environment:
-  DYNAMODB_TABLE_NAME: ${self:custom.dynamodbTableName}
+  TRANSACTION_TABLE_NAME: ${self:custom.tranasctionTableName}
   LOG_LEVEL: ${self:custom.logLevel}
 events:
   - http:

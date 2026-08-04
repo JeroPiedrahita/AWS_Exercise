@@ -4,9 +4,9 @@ handler: dist/src/infrastructure/inputs/lambdas/send-confirmation-handler.handle
 timeout: 30
 memorySize: 256
 environment:
-  CUSTOMERS_TABLE_NAME: !Ref CustomersTable
-  ACCOUNTS_TABLE_NAME: !Ref AccountsTable
-  SES_SOURCE_EMAIL: ${env:SES_SOURCE_EMAIL, 'jeronimopiedrahita17@gmail.com'}
+  CUSTOMERS_TABLE_NAME: ${self:custom.customersTableName}
+  ACCOUNTS_TABLE_NAME: ${self:custom.accountsTableName}
+  SES_SOURCE_EMAIL: ${self:custom.sesSourceEmail}
   LOG_LEVEL: ${self:custom.logLevel}
 events:
   - sqs:

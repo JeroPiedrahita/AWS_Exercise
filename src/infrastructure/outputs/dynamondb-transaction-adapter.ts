@@ -15,7 +15,7 @@ export class DynamonDBTransactionAdapter implements ITransactionRepository {
         region: process.env.AWS_REGION || 'us-east-1',
     });
 
-    private readonly tableName = process.env.DYNAMODB_TABLE_NAME || 'TransaccionesBancariasDev';
+    private readonly tableName = process.env.TRANSACTION_TABLE_NAME || 'TransaccionesBancariasDev';
 
     /**
      * Persists a transaction in DynamoDB

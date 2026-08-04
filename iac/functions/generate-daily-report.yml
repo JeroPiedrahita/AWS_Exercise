@@ -4,7 +4,7 @@ handler: dist/src/infrastructure/inputs/lambdas/generate-daily-report-handler.ha
 timeout: 60
 memorySize: 512
 environment:
-  DYNAMODB_TABLE_NAME: ${self:custom.dynamodbTableName}
+  TRANSACTION_TABLE_NAME: ${self:custom.transactionTableName}
   S3_BUCKET_NAME: ${self:custom.s3BucketName}
   LOG_LEVEL: ${self:custom.logLevel}
 events:

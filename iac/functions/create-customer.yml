@@ -4,9 +4,9 @@ handler: dist/src/infrastructure/inputs/lambdas/create-customer-handler.handler
 timeout: 30
 memorySize: 256
 environment:
-  CUSTOMERS_TABLE_NAME: !Ref CustomersTable
-  ACCOUNTS_TABLE_NAME: !Ref AccountsTable
-  CONFIRMATION_QUEUE_URL: !Ref ConfirmationQueue
+  CUSTOMERS_TABLE_NAME: ${self:custom.customersTableName}
+  ACCOUNTS_TABLE_NAME: ${self:custom.accountsTableName} 
+  CONFIRMATION_QUEUE_URL: ${self:custom.confirmationQueueUrl}
   LOG_LEVEL: ${self:custom.logLevel}
 events:
   - http:

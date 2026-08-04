@@ -5,11 +5,11 @@ provider: ${file(./iac/provider.yml)}
 custom:
   stage: ${opt:stage, 'dev'}
   awsRegion: ${env:AWS_REGION, 'us-east-1'}
-  dynamodbTableName: ${env:DYNAMODB_TABLE_NAME, 'TransaccionesBancariasDev'}
+  transactionTableName: ${env:TRANSACTION_TABLE_NAME, 'TransaccionesBancariasDev'}
   s3BucketName: ${env:S3_BUCKET_NAME, 'transacciones-reportes-303040220363'}
   logLevel: ${env:LOG_LEVEL, 'info'}
-  customersTableName: ${env:CUSTOMERS_TABLE_NAME, 'CustomersTable'}
-  accountsTableName: ${env:ACCOUNTS_TABLE_NAME, 'practica-aws-accounts-dev'}
+  customersTableName: ${env:CUSTOMERS_TABLE_NAME}
+  accountsTableName: ${env:ACCOUNTS_TABLE_NAME}
   confirmationQueueUrl: !Ref ConfirmationQueue
   sesSourceEmail: ${env:SES_SOURCE_EMAIL, 'noreply@example.com'}
 
