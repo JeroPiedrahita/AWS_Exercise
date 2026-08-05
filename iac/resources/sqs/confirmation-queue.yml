@@ -1,0 +1,16 @@
+ConfirmationQueue:
+  Type: AWS::SQS::Queue
+  Properties:
+    QueueName: ${self:service}-confirmation-queue-${self:custom.stage}
+    VisibilityTimeout: 60
+    MessageRetentionPeriod: 345600
+    RedrivePolicy:
+      deadLetterTargetArn: !GetAtt ConfirmationDLQ.Arn
+      maxReceiveCount: 3
+  DependsOn: ConfirmationDLQ
+
+ConfirmationDLQ:
+  Type: AWS::SQS::Queue
+  Properties:
+    QueueName: ${self:service}-confirmation-dlq-${self:custom.stage}
+    MessageRetentionPeriod: 1209600

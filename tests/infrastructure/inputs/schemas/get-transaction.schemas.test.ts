@@ -2,6 +2,7 @@ import {
     GetTransactionPathParamsSchema,
     TransactionResponseSchema,
 } from '@/infrastructure/inputs/schemas/get-transaction.schemas';
+import { SchemaLimits } from '@/infrastructure/constants/schema.constants';
 
 describe('GetTransactionPathParamsSchema', () => {
     describe('valid inputs', () => {
@@ -15,7 +16,7 @@ describe('GetTransactionPathParamsSchema', () => {
         });
 
         it('should accept id at max length of 128 characters', () => {
-            const result = GetTransactionPathParamsSchema.safeParse({ id: 'x'.repeat(128) });
+            const result = GetTransactionPathParamsSchema.safeParse({ id: 'x'.repeat(SchemaLimits.MAX_TRANSACTION_ID_LENGTH) });
 
             expect(result.success).toBe(true);
         });
@@ -64,7 +65,7 @@ describe('GetTransactionPathParamsSchema', () => {
         });
 
         it('should reject id exceeding 128 characters', () => {
-            const result = GetTransactionPathParamsSchema.safeParse({ id: 'x'.repeat(129) });
+            const result = GetTransactionPathParamsSchema.safeParse({ id: 'x'.repeat(SchemaLimits.MAX_TRANSACTION_ID_LENGTH + 1) });
 
             expect(result.success).toBe(false);
         });

@@ -1,5 +1,12 @@
-handler: dist/src/infrastructure/adapters/inputs/generate-daily-report-handler.handler
-
+name: func-${self:service}-${sls:stage}-generateDailyReport
+description: Generates a daily Excel report of all transactions and uploads it to S3 storage.
+handler: dist/src/infrastructure/inputs/lambdas/generate-daily-report-handler.handler
+timeout: 60
+memorySize: 512
+environment:
+  TRANSACTION_TABLE_NAME: ${self:custom.transactionTableName}
+  S3_BUCKET_NAME: ${self:custom.s3BucketName}
+  LOG_LEVEL: ${self:custom.logLevel}
 events:
   - schedule:
       rate: cron(59 23 * * ? *)

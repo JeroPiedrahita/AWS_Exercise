@@ -5,6 +5,7 @@ import { TransactionNotFoundError } from '../../../domain/exceptions/transaction
 import { BaseError } from '../../../domain/exceptions/base.error';
 import { GetTransactionPathParamsSchema, TransactionResponseSchema } from '../schemas/get-transaction.schemas';
 import { validateSchema, buildValidationErrorResponse, validateResponse } from '../schemas/validation.helper';
+import { HTTP_STATUS } from '@/infrastructure/constants/http-response';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
@@ -31,14 +32,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         const validatedResponse = validateResponse(TransactionResponseSchema, serializedTransaction);
 
         return {
-            statusCode: 200,
+            statusCode: HTTP_STATUS.OK,
             body: JSON.stringify(validatedResponse),
         };
     } catch (error) {
         if (error instanceof TransactionNotFoundError) {
             console.error(error.internalMessage);
             return {
-                statusCode: 404,
+                statusCode: HTTP_STATUS.TRANSACTION_NOT_FOUND,
                 body: JSON.stringify({ error: error.userMessage }),
             };
         }
@@ -46,14 +47,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         if (error instanceof BaseError) {
             console.error(error.internalMessage);
             return {
-                statusCode: 400,
+                statusCode: HTTP_STATUS.BAD_REQUEST,
                 body: JSON.stringify({ error: error.userMessage }),
             };
         }
 
         console.error(error);
         return {
-            statusCode: 500,
+            statusCode: HTTP_STATUS.INTERNAL_ERROR,
             body: JSON.stringify({ error: 'Error interno del servidor' }),
         };
     }

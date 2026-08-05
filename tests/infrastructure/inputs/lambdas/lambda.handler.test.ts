@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import { handler } from '@/infrastructure/inputs/lambdas/lambda.handler';
+import { handler } from '@/infrastructure/inputs/lambdas/lambda-handler';
 import { BaseError } from '@/domain/exceptions/base.error';
 
 jest.mock('@/infrastructure/outputs/dynamondb-transaction-adapter', () => ({

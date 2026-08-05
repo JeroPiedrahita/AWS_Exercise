@@ -2,11 +2,12 @@ import { APIGatewayProxyEvent } from 'aws-lambda';
 import { TransactionNotFoundError } from '@/domain/exceptions/transaction-not-found.error';
 import { BaseError } from '@/domain/exceptions/base.error';
 import { createValidTransaction } from '../../../fixtures/transaction.fixtures';
+import { SchemaLimits } from '@/infrastructure/constants/schema.constants';
 
 jest.mock('@/infrastructure/outputs/dynamondb-transaction-adapter');
 jest.mock('@/application/get-transaction.use-case');
 
-import { handler } from '@/infrastructure/inputs/lambdas/get-transaction.handler';
+import { handler } from '@/infrastructure/inputs/lambdas/get-transaction-handler';
 import { GetTransactionUseCase } from '@/application/get-transaction.use-case';
 
 const MockGetTransactionUseCase = GetTransactionUseCase as jest.MockedClass<typeof GetTransactionUseCase>;
@@ -95,7 +96,7 @@ describe('get-transaction.handler', () => {
 
     it('should return 400 with validation error format when id exceeds max length', async () => {
         const event = createApiGatewayEvent({
-            pathParameters: { id: 'a'.repeat(129) },
+            pathParameters: { id: 'a'.repeat(SchemaLimits.MAX_TRANSACTION_ID_LENGTH + 1) },
         });
 
         const result = await handler(event);

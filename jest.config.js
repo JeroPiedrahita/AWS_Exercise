@@ -1,4 +1,10 @@
 /** @type {import('jest').Config} */
+
+process.env.AWS_REGION = process.env.AWS_REGION || 'us-east-1';
+process.env.TRANSACTION_TABLE_NAME = process.env.TRANSACTION_TABLE_NAME || 'TransaccionesBancariasDev';
+process.env.S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || 'transacciones-reportes-303040220363';
+process.env.PORT = process.env.PORT || '3000';
+
 const config = {
     preset: 'ts-jest',
     testEnvironment: 'node',

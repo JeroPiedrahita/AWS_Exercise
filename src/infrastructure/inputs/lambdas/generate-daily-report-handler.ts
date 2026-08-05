@@ -5,6 +5,7 @@ import { S3FileStorage } from '../../outputs/s3filestorage';
 import { BaseError } from '../../../domain/exceptions/base.error';
 import { GenerateDailyReportEventSchema } from '../schemas/generate-daily-report.schemas';
 import { validateSchema, buildValidationErrorResponse } from '../schemas/validation.helper';
+import { HTTP_STATUS } from '@/infrastructure/constants/http-response';
 
 export const handler = async (event: unknown): Promise<any> => {
     try {
@@ -30,7 +31,7 @@ export const handler = async (event: unknown): Promise<any> => {
         await useCase.execute();
 
         return {
-            statusCode: 200,
+            statusCode: HTTP_STATUS.OK,
             body: JSON.stringify({
                 message: 'Reporte diario generado correctamente',
             }),
@@ -39,14 +40,14 @@ export const handler = async (event: unknown): Promise<any> => {
         if (error instanceof BaseError) {
             console.error(error);
             return {
-                statusCode: 400,
+                statusCode: HTTP_STATUS.BAD_REQUEST,
                 body: JSON.stringify({ error: error.userMessage }),
             };
         }
 
         console.error(error);
         return {
-            statusCode: 500,
+            statusCode: HTTP_STATUS.INTERNAL_ERROR,
             body: JSON.stringify({ error: 'Error al generar el reporte diario' }),
         };
     }

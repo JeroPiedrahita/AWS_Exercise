@@ -1,4 +1,5 @@
 import { TransactionStatus } from "../constants/transaction-status";
+import { AccountRules } from "../constants/account.constants";
 /**
  * Represents a financial transaction processed by the system.
  */
@@ -23,7 +24,7 @@ export class Transaction{
     }
     //Bussines Ruls: The value of transaction is more that cero
     private validateAmount(): void{
-        if(this.amount <=0){
+        if(this.amount <=AccountRules.MIN_INITIAL_AMOUNT){
             throw new Error("El monto de la transacción debe ser mayor a cero.");
         }
     }
