@@ -1,0 +1,41 @@
+# Existing permissions (Transactions table and S3)
+- Effect: Allow
+  Action:
+    - dynamodb:GetItem
+    - dynamodb:PutItem
+    - dynamodb:Scan
+  Resource: "*"
+
+- Effect: Allow
+  Action:
+    - s3:PutObject
+  Resource: "*"
+
+# Customer Account Creation - DynamoDB permissions (Customers and Accounts tables + GSIs)
+- Effect: Allow
+  Action:
+    - dynamodb:PutItem
+    - dynamodb:GetItem
+    - dynamodb:Query
+    - dynamodb:UpdateItem
+    - dynamodb:TransactWriteItems
+  Resource:
+    - !GetAtt CustomersTable.Arn
+    - !Join ['/', [!GetAtt CustomersTable.Arn, 'index', '*']]
+    - !GetAtt AccountsTable.Arn
+    - !Join ['/', [!GetAtt AccountsTable.Arn, 'index', '*']]
+
+# Customer Account Creation - SQS permissions (Confirmation Queue)
+- Effect: Allow
+  Action:
+    - sqs:SendMessage
+    - sqs:ReceiveMessage
+    - sqs:DeleteMessage
+  Resource:
+    - !GetAtt ConfirmationQueue.Arn
+
+# Customer Account Creation - SES permissions (Email sending)
+- Effect: Allow
+  Action:
+    - ses:SendEmail
+  Resource: "*"
