@@ -1,5 +1,15 @@
 name: aws
+stage: ${self:custom.stage}
 runtime: nodejs20.x
+lambdaHashingVersion: 20201221
+versionFunctions: false
+deploymentBucket:
+  name: practica-aws-deployments-${self:custom.stage}
+  maxPreviousDeploymentArtifacts: 10
+stackTags:
+  Ambiente: ${self:custom.stage}
+  Aplicativo: practica-aws
+  Despliegue: serverless
 
 iamRoleStatements:
   ${file(./iac/resources/iam-role.yml)}

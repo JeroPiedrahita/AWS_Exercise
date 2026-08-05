@@ -3,21 +3,31 @@ service: practica-aws
 provider: ${file(./iac/provider.yml)}
 
 custom:
-  stage: ${sls:stage}
+  stage: ${opt:stage, 'dev'}
   awsRegion: ${env:AWS_REGION, 'us-east-1'}
-  dynamodbTableName: ${env:DYNAMODB_TABLE_NAME, 'TransaccionesBancariasDev'}
+  transactionTableName: ${env:TRANSACTION_TABLE_NAME, 'TransaccionesBancariasDev'}
   s3BucketName: ${env:S3_BUCKET_NAME, 'transacciones-reportes-303040220363'}
   logLevel: ${env:LOG_LEVEL, 'info'}
+  customersTableName: ${env:CUSTOMERS_TABLE_NAME}
+  accountsTableName: ${env:ACCOUNTS_TABLE_NAME}
+  confirmationQueueUrl: !Ref ConfirmationQueue
+  sesSourceEmail: ${env:SES_SOURCE_EMAIL, 'noreply@example.com'}
 
 functions:
   registerPayment: ${file(./iac/functions/register-payment.yml)}
   getTransaction: ${file(./iac/functions/get-transaction.yml)}
   generateDailyReport: ${file(./iac/functions/generate-daily-report.yml)}
+  createCustomer: ${file(./iac/functions/create-customer.yml)}
+  sendConfirmation: ${file(./iac/functions/send-confirmation.yml)}
 
 resources:
   Resources:
     TransaccionesTable: ${file(./iac/resources/dynamodb-table.yml)}
     ReportesBucket: ${file(./iac/resources/report-bucket.yml)}
+    CustomersTable: ${file(./iac/resources/customers-table.yml)}
+    AccountsTable: ${file(./iac/resources/accounts-table.yml)}
+    ConfirmationQueue: ${file(./iac/resources/confirmation-queue.yml):ConfirmationQueue}
+    ConfirmationDLQ: ${file(./iac/resources/confirmation-queue.yml):ConfirmationDLQ}
 
 plugins:
   - serverless-offline

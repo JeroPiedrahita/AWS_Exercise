@@ -88,7 +88,9 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
         const invalidPathId = () => fc.oneof(
             fc.constant(''),
             fc.constant('   '),
+            // Generate strings whose trimmed length exceeds MAX_TRANSACTION_ID_LENGTH
             fc.string({ minLength: SchemaLimits.MAX_TRANSACTION_ID_LENGTH + 1, maxLength: 200 })
+                .filter((s) => s.trim().length > SchemaLimits.MAX_TRANSACTION_ID_LENGTH)
         );
 
         it('GetTransactionPathParamsSchema accepts valid inputs and rejects invalid ones', () => {
@@ -276,10 +278,21 @@ describe('Property-Based Tests: Zod DTO Validation', () => {
         });
 
         it('GenerateDailyReportEventSchema preserves valid input data', () => {
+            // Use a safe object generator that avoids prototype-polluting keys like __proto__
+            const safeKeyArb = fc.string({ minLength: 1, maxLength: 20 }).filter(
+                (key) => key !== '__proto__' && key !== 'constructor' && key !== 'prototype'
+            );
+            const safeObjectArb = fc.dictionary(safeKeyArb, fc.oneof(
+                fc.string(),
+                fc.integer(),
+                fc.boolean(),
+                fc.constant(null)
+            ));
+
             const validDailyReportArb = fc.record({
                 source: fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_EVENT_FIELD_LENGTH }),
                 'detail-type': fc.string({ minLength: 1, maxLength: SchemaLimits.MAX_EVENT_FIELD_LENGTH }),
-                detail: fc.object(),
+                detail: safeObjectArb,
             });
 
             fc.assert(

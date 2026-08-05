@@ -1,0 +1,36 @@
+Type: AWS::DynamoDB::Table
+
+Properties:
+  TableName: ${self:service}-accounts-${self:custom.stage}
+  BillingMode: PAY_PER_REQUEST
+
+  AttributeDefinitions:
+    - AttributeName: accountId
+      AttributeType: S
+    - AttributeName: accountNumber
+      AttributeType: S
+    - AttributeName: customerId
+      AttributeType: S
+
+  KeySchema:
+    - AttributeName: accountId
+      KeyType: HASH
+
+  GlobalSecondaryIndexes:
+    # Nuevo GSI con proyección correcta
+    - IndexName: AccountNumberIndex-v1
+      KeySchema:
+        - AttributeName: accountNumber
+          KeyType: HASH
+      Projection:
+        ProjectionType: INCLUDE
+        NonKeyAttributes:
+          - customerId
+
+    # GSI para buscar por customerId
+    - IndexName: CustomerIdIndex-v1
+      KeySchema:
+        - AttributeName: customerId
+          KeyType: HASH
+      Projection:
+        ProjectionType: ALL

@@ -1,0 +1,23 @@
+Type: AWS::DynamoDB::Table
+
+Properties:
+  TableName: ${self:service}-customers-${self:custom.stage}
+  BillingMode: PAY_PER_REQUEST
+
+  AttributeDefinitions:
+    - AttributeName: customerId
+      AttributeType: S
+    - AttributeName: normalizedIdentificationNumber
+      AttributeType: S
+
+  KeySchema:
+    - AttributeName: customerId
+      KeyType: HASH
+
+  GlobalSecondaryIndexes:
+    - IndexName: IdentificationNumberIndex
+      KeySchema:
+        - AttributeName: normalizedIdentificationNumber
+          KeyType: HASH
+      Projection:
+        ProjectionType: KEYS_ONLY
